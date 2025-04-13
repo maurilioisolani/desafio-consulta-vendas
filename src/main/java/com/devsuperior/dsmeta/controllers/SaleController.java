@@ -32,12 +32,16 @@ public class SaleController {
 
 	@GetMapping(value = "/report")
 	public ResponseEntity<Page<SaleFullDTO>> getSalesReport(
-			@RequestParam(value = "minDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate minDate,
-			@RequestParam(value = "maxDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate maxDate,
+			@RequestParam(value = "minDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate minDate,
+			@RequestParam(value = "maxDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate maxDate,
 			@RequestParam(value = "name", defaultValue = "") String name,
 			Pageable pageable) {
 
-		Page<SaleFullDTO> result = service.getSalesReport(minDate, maxDate, name, pageable);
+		LocalDate today = LocalDate.ofInstant(Instant.now(), ZoneId.systemDefault());
+		LocalDate finalDate = (maxDate == null) ? today : maxDate;
+		LocalDate initialDate = (minDate == null) ? finalDate.minusYears(1L) : minDate;
+
+		Page<SaleFullDTO> result = service.getSalesReport(initialDate, finalDate, name, pageable);
 		return ResponseEntity.ok(result);
 	}
 
